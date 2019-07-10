@@ -12,9 +12,9 @@ const {
 
 const unauthorized = (err, req, res, next) => {
   if (err.status !== UNAUTHORIZED) return next(err)
-
+  delete err.status;
   res.status(UNAUTHORIZED).send({
-    ok: false,
+    error: true,
     message: err.message || 'Unauthorized',
     errors: [err]
   })
@@ -22,9 +22,9 @@ const unauthorized = (err, req, res, next) => {
 
 const forbidden = (err, req, res, next) => {
   if (err.status !== FORBIDDEN) return next(err)
-
+  delete err.status;
   res.status(FORBIDDEN).send({
-    ok: false,
+    error: true,
     message: err.message || 'Forbidden',
     errors: [err]
   })
@@ -32,9 +32,9 @@ const forbidden = (err, req, res, next) => {
 
 const conflict = (err, req, res, next) => {
   if (err.status !== CONFLICT) return next(err)
-
+  delete err.status;
   res.status(CONFLICT).send({
-    ok: false,
+    error: true,
     message: err.message || 'Conflict',
     errors: [err]
   })
@@ -42,9 +42,9 @@ const conflict = (err, req, res, next) => {
 
 const badRequest = (err, req, res, next) => {
   if (err.status !== BAD_REQUEST) return next(err)
-
+  delete err.status;
   res.status(BAD_REQUEST).send({
-    ok: false,
+    error: true,
     message: err.message || 'Bad Request',
     errors: [err]
   })
@@ -52,9 +52,9 @@ const badRequest = (err, req, res, next) => {
 
 const unprocessable = (err, req, res, next) => {
   if (err.status !== UNPROCESSABLE) return next(err)
-
+  delete err.status;
   res.status(UNPROCESSABLE).send({
-    ok: false,
+    error: true,
     message: err.message || 'Unprocessable entity',
     errors: [err]
   })
@@ -64,17 +64,18 @@ const unprocessable = (err, req, res, next) => {
 // return a 404 error.
 const notFound = (err, req, res, next) => {
   if (err.status !== NOT_FOUND) return next(err)
-
+  delete err.status;
   res.status(NOT_FOUND).send({
-    ok: false,
+    error: true,
     message: err.message || 'The requested resource could not be found'
   })
 }
 
 // If there's still an error at this point, return a generic 500 error.
 const genericError = (err, req, res, next) => {
+  delete err.status;
   res.status(GENERIC_ERROR).send({
-    ok: false,
+    error: true,
     message: err.message || 'Internal server error',
     errors: [err]
   })
@@ -84,7 +85,7 @@ const genericError = (err, req, res, next) => {
 // return a 404 error.
 const catchall = (req, res, next) => {
   res.status(NOT_FOUND).send({
-    ok: false,
+    error: true,
     message: 'The requested resource could not be found'
   })
 }

@@ -1,9 +1,11 @@
 'use strict'
 
 const router = require('express').Router()
+const { wrap } = require('../../helpers/helpers')
 
 const {
   getCards,
+  // checkCard,
   postProjects,
   getProjects,
   getProject,
@@ -12,7 +14,10 @@ const {
 } = require('../../controllers/sc_controller')
 
 router.route('/cards')
-  .get(getCards)
+  .get(wrap(getCards))
+
+// router.route('/cards/check')
+  // .get(checkCard)
 
 router.route('/users/:id/projects')
   .post(postProjects)

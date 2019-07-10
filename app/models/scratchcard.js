@@ -5,7 +5,7 @@ const createGuts = require('../helpers/model-guts')
 const name = 'Scratchcard'
 const tableName = 'scratch_card'
 
-const selectableProps = ['*']
+const selectableProps = ['batch_number','campaign_code','serial_no','status','inventory_info']
 
 module.exports = knex => {
   const guts = createGuts({

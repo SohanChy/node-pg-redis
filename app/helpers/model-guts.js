@@ -17,6 +17,7 @@ module.exports = ({
   class Paginator {
     constructor(total,limit,offset,dataLength,page) {
         this.total = total;
+        this.dataLength = dataLength,
         this.limit = limit;
         this.offset = offset;
         this.from = offset + 1;
@@ -32,18 +33,29 @@ module.exports = ({
     .timeout(timeout);
   }
 
-  const paginateQuery = async function(knexQb,limit = 10, page = 1, filters = {}){
-    const offset = (page - 1) * limit
+  const filteredQueryBuilder = function(filters = {}){
+    let knexQb = knex.select(selectableProps)
+    .from(tableName)
+    .timeout(timeout);
 
+    for(let filterKey in filters){
+      knexQb.where(filterKey,filters[filterKey]);
+    }
+
+    return knexQb;
+  }
+
+  const paginateQuery = async function(knexQb,limit = 200, page = 1, dontCount = true){
+    const offset = (page - 1) * limit
     let data = null;
     let total = null;
-    if(limit !== Infinity){
-        data = await knexQb.offset(offset).limit(limit)    
-        total = ( await knex.from(tableName).timeout(timeout).count('* as count').first() ).count
+    if(dontCount){
+        data = await knexQb.offset(offset).limit(limit)
+        total = data.length
     }
     else {
-        data = await knexQb.offset(offset)
-        total = data.length
+        data = await knexQb.offset(offset).limit(limit)    
+        total = ( await knex.from(tableName).timeout(timeout).count('* as count').first() ).count
     }
 
     return {
@@ -73,7 +85,7 @@ const create = props => {
   // Same as `find` but only returns the first match if >1 are found.
   const findOne = filters => find(filters)
     .then(results => {
-      if (!Array.isArray(users)) return results
+      if (!Array.isArray(results)) return results
 
       return results[0]
     })
@@ -111,6 +123,7 @@ const create = props => {
     update,
     destroy,
     queryBuilder,
-    paginateQuery
+    paginateQuery,
+    filteredQueryBuilder
   }
 }

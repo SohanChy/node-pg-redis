@@ -1,22 +1,19 @@
 'use strict'
 
 const { Scratchcard, Project } = require('../models')
-import { knexPaginate } from '../helpers/helpers'
+const { transformResponseToCoreStyle,extractFilters } = require("../helpers/helpers")
 
 export async function getCards(req, res, next){
-  console.table(req.params);
 
-  const limit = parseInt(req.query.limit) || Infinity;
+  const limit = parseInt(req.query.limit) || 200;
   const page = parseInt(req.query.page) || 1;
+  const appliedFilters = extractFilters(req.query,['status','batch_number','campaign_code']);
 
-  let qb = Scratchcard.queryBuilder();
-  
-  const scs = await Scratchcard.paginateQuery(qb,limit,page,{});
+  let qb = Scratchcard.filteredQueryBuilder(appliedFilters);
+  const scs = await Scratchcard.paginateQuery(qb,limit,page,{})
+              .catch(next);
 
-  res.json({
-    success: true,
-    data: scs
-  })
+  return res.json(transformResponseToCoreStyle(scs));
 
 }
 
