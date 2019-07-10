@@ -12,17 +12,55 @@ module.exports = ({
   name = 'name',
   tableName = 'tablename',
   selectableProps = [],
-  timeout = 1000
+  timeout = parseInt(process.env.DB_TIMEOUT) || 5
 }) => {
-  const create = props => {
-    delete props.id // not allowed to set `id`
-
-    return knex.insert(props)
-      .returning(selectableProps)
-      .into(tableName)
-      .timeout(timeout)
+  class Paginator {
+    constructor(total,limit,offset,dataLength,page) {
+        this.total = total;
+        this.limit = limit;
+        this.offset = offset;
+        this.from = offset + 1;
+        this.to = offset + dataLength;
+        this.page = page;
+        this.lastPage = Math.ceil(total / limit);
+    }
   }
 
+  const queryBuilder = function(){
+    return knex.select(selectableProps)
+    .from(tableName)
+    .timeout(timeout);
+  }
+
+  const paginateQuery = async function(knexQb,limit = 10, page = 1, filters = {}){
+    const offset = (page - 1) * limit
+
+    let data = null;
+    let total = null;
+    if(limit !== Infinity){
+        data = await knexQb.offset(offset).limit(limit)    
+        total = ( await knex.from(tableName).timeout(timeout).count('* as count').first() ).count
+    }
+    else {
+        data = await knexQb.offset(offset)
+        total = data.length
+    }
+
+    return {
+        paginator: new Paginator(total,limit,offset,data.length,page),
+        data
+    };
+
+}
+
+const create = props => {
+  delete props.id // not allowed to set `id`
+
+  return knex.insert(props)
+    .returning(selectableProps)
+    .into(tableName)
+    .timeout(timeout)
+}
   const findAll = () => knex.select(selectableProps)
     .from(tableName)
     .timeout(timeout)
@@ -71,6 +109,8 @@ module.exports = ({
     findOne,
     findById,
     update,
-    destroy
+    destroy,
+    queryBuilder,
+    paginateQuery
   }
 }

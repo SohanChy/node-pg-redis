@@ -1,13 +1,18 @@
 'use strict'
 
 const router = require('express').Router()
+
 const {
+  getCards,
   postProjects,
   getProjects,
   getProject,
   putProject,
   deleteProject
-} = require('../controllers/project_controller')
+} = require('../../controllers/sc_controller')
+
+router.route('/cards')
+  .get(getCards)
 
 router.route('/users/:id/projects')
   .post(postProjects)

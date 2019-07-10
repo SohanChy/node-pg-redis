@@ -1,6 +1,6 @@
 'use strict'
 
-const { User } = require('./server/models')
+const { User } = require('./app/models')
 
 User.create({
   username: 'admin',

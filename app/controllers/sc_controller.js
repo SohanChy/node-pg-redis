@@ -1,6 +1,24 @@
 'use strict'
 
-const { Project, User } = require('../models')
+const { Scratchcard, Project } = require('../models')
+import { knexPaginate } from '../helpers/helpers'
+
+export async function getCards(req, res, next){
+  console.table(req.params);
+
+  const limit = parseInt(req.query.limit) || Infinity;
+  const page = parseInt(req.query.page) || 1;
+
+  let qb = Scratchcard.queryBuilder();
+  
+  const scs = await Scratchcard.paginateQuery(qb,limit,page,{});
+
+  res.json({
+    success: true,
+    data: scs
+  })
+
+}
 
 const postProjects = (req, res, next) => {
   const userId = req.params.id
@@ -71,5 +89,6 @@ module.exports = {
   getProjects,
   getProject,
   putProject,
-  deleteProject
+  deleteProject,
+  getCards
 }
