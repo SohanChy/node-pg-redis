@@ -1,31 +1,15 @@
 'use strict'
 
-const router = require('express').Router()
-const { wrap } = require('../../helpers/helpers')
+const router = require('express').Router();
+const { wrap } = require('../../helpers/helpers');
 
 const {
-  getCards,
-  // checkCard,
-  postProjects,
-  getProjects,
-  getProject,
-  putProject,
-  deleteProject
-} = require('../../controllers/sc_controller')
+  lockCardTemporarily,
+  unlockCard
+} = require('../../controllers/v1/sc_controller');
 
-router.route('/cards')
-  .get(wrap(getCards))
+router.route('/lock-temporary/:card_no').put(wrap(lockCardTemporarily));
+router.route('/unlock/:card_no').delete(wrap(unlockCard));
 
-// router.route('/cards/check')
-  // .get(checkCard)
-
-router.route('/users/:id/projects')
-  .post(postProjects)
-  .get(getProjects)
-
-router.route('/projects/:id')
-  .get(getProject)
-  .put(putProject)
-  .delete(deleteProject)
 
 module.exports = router

@@ -16,7 +16,7 @@ module.exports = ({
 }) => {
   class Paginator {
     constructor(total,limit,offset,dataLength,page) {
-        this.total = total;
+        this.total = parseInt(total);
         this.dataLength = dataLength,
         this.limit = limit;
         this.offset = offset;
@@ -27,13 +27,18 @@ module.exports = ({
     }
   }
 
-  const queryBuilder = function(){
+  const rawQueryBuilder = function(){
+    return knex('scratch_card')
+    .timeout(timeout);
+  }
+
+  const queryBuilder = function(selectableProps=selectableProps){
     return knex.select(selectableProps)
     .from(tableName)
     .timeout(timeout);
   }
 
-  const filteredQueryBuilder = function(filters = {}){
+  const filteredQueryBuilder = function(filters = {},selectableProps=selectableProps){
     let knexQb = knex.select(selectableProps)
     .from(tableName)
     .timeout(timeout);
@@ -45,17 +50,21 @@ module.exports = ({
     return knexQb;
   }
 
-  const paginateQuery = async function(knexQb,limit = 200, page = 1, dontCount = true){
+  const paginateQuery = async function(knexQb,query, count = false){
+
+    const limit = parseInt(query.limit) || 200;
+    const page = parseInt(query.page) || 1;
+
     const offset = (page - 1) * limit
     let data = null;
     let total = null;
-    if(dontCount){
-        data = await knexQb.offset(offset).limit(limit)
-        total = data.length
+    if(count){
+      total = ( await knex.count('* as total').from(knexQb.clone().as('inner')).first() ).total;
+      data = await knexQb.offset(offset).limit(limit)    
     }
     else {
-        data = await knexQb.offset(offset).limit(limit)    
-        total = ( await knex.from(tableName).timeout(timeout).count('* as count').first() ).count
+        data = await knexQb.offset(offset).limit(limit)
+        total = data.length
     }
 
     return {
@@ -124,6 +133,7 @@ const create = props => {
     destroy,
     queryBuilder,
     paginateQuery,
-    filteredQueryBuilder
+    filteredQueryBuilder,
+    rawQueryBuilder
   }
 }

@@ -45,15 +45,26 @@
         return appliedFilters;
     }
 
-    const transformResponseToCoreStyle = function(result){
-        return {
+    const transformResponseToCoreStyle = function(result,showTotalCount = false){
+
+        let data = {
             error: false,
-            meta: {
+            data: result.data ? result.data : result
+        }
+
+        if(result.paginator){
+            data.meta = {
                 pageNumber: result.paginator.page,
                 dataLength: result.paginator.dataLength
-            },
-            data: result.data
+            };
+    
+            if(showTotalCount){
+                data.meta.totalCount = result.paginator.total
+            }
         }
+        
+
+        return data;
     }
 
     /**
@@ -71,4 +82,4 @@
         };
     }
 
-    export {transformResponseToCoreStyle,dataGet,extractFilters,wrap,ApiError}
+    module.exports = {transformResponseToCoreStyle,dataGet,extractFilters,wrap,ApiError}
