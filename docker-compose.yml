@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  web:
+    build:
+      context: .
+      args:
+        - ENV=development
+    command: sh -c "node -r dotenv/config ./app/start.js" 
+    volumes:
+      - ./:/app
+    ports:
+      - 3000:3000
+    links:
+      - redis
+    restart: on-failure
+    environment:
+      - REDIS_HOST=redis
+
+  redis:
+    image: redis:5.0.5-alpine
